@@ -120,9 +120,28 @@ figures. Until you've completed all the parts, you may safely leave these
 captions blank.
 
 ```{r code block to create descriptive captions}
-caption_4 <- 'Descriptive Caption for part 4 here'
-caption_5 <- 'Descriptive Caption for part 5 here'
-caption_8 <- 'Descriptive Caption for part 8 here'
+caption_4 <- 'Variance explained by each principal component (PC) from PCA of 
+the example intensity data. Blue bars represent the proportion of variance explained 
+by each individual PC, while the red line and points display the cumulative proportion 
+of variance explained as additional PCs are included. PCs are ordered left to right 
+from most to least variance explained (PC1, PC2, PC3, etc.). The cumulative variance 
+curve approaching 1.0 indicates the total number of PCs required to capture the 
+majority of variability in the dataset.'
+caption_5 <- 'Principal component analysis (PCA) biplot of PC1 versus PC2 
+for the example intensity data. Each point represents an individual sample, colored 
+by its SixSubtypesClassification label. The x-axis (PC1) and y-axis (PC2) display 
+the proportion of total variance explained by each principal component, respectively. 
+Clustering of points by color indicates that gene expression profiles separate 
+by subtype, while overlap between colors suggests shared expression patterns 
+across subtypes.'
+caption_8 <- 'Heatmap of intensity values for differentially expressed probes 
+identified at an FDR threshold of 0.01. Each row represents an individual probe and 
+each column represents a sample. Intensity values are row-normalized (z-scored) to 
+highlight relative expression differences across samples. Rows and columns are 
+hierarchically clustered to reveal co-expression patterns among probes and groupings 
+among samples. Color intensity reflects the normalized expression level, with one end 
+of the RdBu palette representing high expression and the other representing low 
+expression.'
 ```
 
 ## 4. Plot the variance explained and cumulative variance for the PCs
@@ -141,6 +160,33 @@ numeric ordering.
 
 ```{r code block to plot variance explained and cumulative variance explained, fig.cap = caption_4}
 #Create a ggplot2 with the plot described above, refer to the reference report
+variance_tibble$principal_components <- factor(
+    variance_tibble$principal_components, 
+    levels = variance_tibble$principal_components
+)
+
+ggplot(variance_tibble, aes(x = principal_components)) +
+    geom_bar(aes(y = variance_explained), 
+             stat = "identity", 
+             fill = "steelblue", 
+             alpha = 0.7) +
+    geom_point(aes(y = cumulative), 
+               color = "darkred", 
+               size = 1) +
+    geom_line(aes(y = cumulative, group = 1), 
+              color = "darkred", 
+              linewidth = 0.5) +
+    labs(
+        title   = "Variance Explained by Principal Components",
+        x       = "Principal Components",
+        y       = "Proportion of Variance Explained",
+        caption = caption_4
+    ) +
+    theme_bw() +
+    theme(
+        axis.text.x  = element_text(angle = 90, hjust = 1, size = 5),
+        plot.title   = element_text(hjust = 0.5, face = "bold")
+    )
 
 ```
 
@@ -164,6 +210,7 @@ variance, visually interpreting these plots requires care as the scale of the
 
 ```{r code block to make a biplot of PC1 and PC2, message = FALSE, fig.cap = caption_5}
 make_biplot('data/proj_metadata.csv', pca_results)
+
 ```
 
 ## 6. Filter the differential_expression_results.csv for significant probes
